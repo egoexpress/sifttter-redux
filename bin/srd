@@ -128,6 +128,7 @@ command :exec do |c|
     unless dates.nil?
       first_date = dates.first
       second_date = dates.reverse_each.first
+      hmac = 'yourhmachere'
 
       date_string = first_date.strftime('%B %d, %Y')
       date_string << " to #{ second_date.strftime('%B %d, %Y') }" if first_date != second_date
@@ -151,11 +152,7 @@ command :exec do |c|
 
       # Upload any entries
       unless Dir[configuration.sifttter_redux[:dayone_local_filepath] + '/*'].empty?
-        dbu.local_target = "#{ configuration.sifttter_redux[:dayone_local_filepath] }/*"
-        dbu.remote_target = configuration.sifttter_redux[:dayone_remote_filepath]
-        dbu.message = 'Uploading entries to Known site'
-
-        messenger.info(dbu.message || dbu::DEFAULT_MESSAGE)
+        messenger.info("Uploading entries to Known site")
         renderer = Redcarpet::Render::HTML.new(hard_wrap: true)
         markdown = Redcarpet::Markdown.new(renderer, extensions = {})
 
@@ -168,22 +165,21 @@ command :exec do |c|
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           request = Net::HTTP::Post.new("/status/edit")
+          request.add_field('Accept', 'application/json')
           request.add_field('X-KNOWN-USERNAME', 'bjoern')
-          request.add_field('X-KNOWN-SIGNATURE', 'skjlv3/yK2gVRDB5inai3+th9qB80ewg2YPeEbhBKLI=')
+          request.add_field('X-KNOWN-SIGNATURE', hmac)
 
           body = {:body => text }
           request.body = body.to_json
 
           response = http.request(request)
-          puts response
         end
 
-        # dbu.upload
         messenger.info('Done.')
       end
 
       # Remove any downloaded local files that we no longer need.
-      # SifttterRedux.cleanup_temp_files
+      SifttterRedux.cleanup_temp_files
     end
   end
 
