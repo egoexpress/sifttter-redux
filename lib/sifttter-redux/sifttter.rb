@@ -13,34 +13,6 @@ module SifttterRedux
       attr_accessor :entries
     end
 
-    # Generates an ERB template for a Day One entry
-    # @param [String] datestamp The ISO8601 datestamp
-    # @param [String] entrytext The text of the entry
-    # @param [Boolean] starred Whether the entry should be starred
-    # @param [String] uuid The UUID of the entry
-    def generate_template(datestamp, entrytext, starred, uuid)
-      ERB.new <<-XMLTEMPLATE
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>Creation Date</key>
-        <date><%= datestamp %></date>
-        <key>Entry Text</key>
-        <string><%= entrytext %></string>
-        <key>Starred</key>
-        <<%= starred %>/>
-        <key>Tags</key>
-        <array>
-          <string>daily logs</string>
-        </array>
-        <key>UUID</key>
-        <string><%= uuid %></string>
-      </dict>
-      </plist>
-      XMLTEMPLATE
-    end
-
     # Opens a filepath and parses it for Sifttter
     # data for the passed date.
     # @param [String] file The filepath to parse
@@ -67,10 +39,9 @@ module SifttterRedux
     # @return [void]
     def self.run(date)
       @entries = {}
-      uuid = SecureRandom.uuid.upcase.gsub(/-/, '').strip
       date_for_title = date.strftime('%B %d, %Y')
+      date_for_name = date.strftime('%Y-%m-%d')
       datestamp = date.to_time.utc.iso8601
-      starred = false
 
       output_dir = configuration.sifttter_redux[:dayone_local_filepath]
       Dir.mkdir(output_dir) unless Dir.exists?(output_dir)
@@ -95,14 +66,13 @@ module SifttterRedux
         entrytext = "# Things done on #{ date_for_title }\n"
         @entries.each do |key, value|
           coder = HTMLEntities.new
-          entrytext += '### ' + key.gsub(/.txt/, '').gsub(/_/, ' ').upcase + "\n\n"
+          entrytext += '### ' + key.gsub(/.txt/, '').gsub(/_/, ' ').capitalize + "\n\n"
           value.each { |v| entrytext += "#{ coder.encode(v[1].gsub(/%time%/, v[0])) }\n" }
           entrytext += "\n"
         end
 
-        template = generate_template(datestamp, entrytext, starred, uuid)
-        fh = File.new(File.expand_path("#{ output_dir }/#{ uuid }.doentry"), 'w+')
-        fh.puts template.result(binding)
+        fh = File.new(File.expand_path("#{ output_dir }/#{ date_for_name }.md"), 'w+')
+        fh.puts entrytext
         fh.close
         messenger.success("Entry logged for #{ date_for_title }...")
       else

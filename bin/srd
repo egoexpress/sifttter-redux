@@ -35,8 +35,13 @@
 require 'archive/zip'
 require 'cliutils'
 require 'gli'
-require 'sifttter-redux'
+require './lib/sifttter-redux'
 require 'securerandom'
+require 'uri'
+require 'net/http'
+require 'openssl'
+require 'redcarpet'
+require 'json'
 
 include CLIUtils::Configuration
 include CLIUtils::Messaging
@@ -144,19 +149,41 @@ command :exec do |c|
         SifttterRedux::Sifttter.run(date)
       end
 
-      # Upload any Day One entries to Dropbox (if there are any).
+      # Upload any entries
       unless Dir[configuration.sifttter_redux[:dayone_local_filepath] + '/*'].empty?
         dbu.local_target = "#{ configuration.sifttter_redux[:dayone_local_filepath] }/*"
         dbu.remote_target = configuration.sifttter_redux[:dayone_remote_filepath]
-        dbu.message = 'Uploading Day One entries to Dropbox...'
+        dbu.message = 'Uploading entries to Known site'
 
         messenger.info(dbu.message || dbu::DEFAULT_MESSAGE)
-        dbu.upload
+        renderer = Redcarpet::Render::HTML.new(hard_wrap: true)
+        markdown = Redcarpet::Markdown.new(renderer, extensions = {})
+
+        Dir.foreach('/tmp/dayone') do |item|
+          next if item == '.' or item == '..'
+          text = markdown.render(File.read("/tmp/dayone/#{ item }"))
+
+          uri = URI.parse("https://known.stierand.org")
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          request = Net::HTTP::Post.new("/status/edit")
+          request.add_field('X-KNOWN-USERNAME', 'bjoern')
+          request.add_field('X-KNOWN-SIGNATURE', 'skjlv3/yK2gVRDB5inai3+th9qB80ewg2YPeEbhBKLI=')
+
+          body = {:body => text }
+          request.body = body.to_json
+
+          response = http.request(request)
+          puts response
+        end
+
+        # dbu.upload
         messenger.info('Done.')
       end
 
       # Remove any downloaded local files that we no longer need.
-      SifttterRedux.cleanup_temp_files
+      # SifttterRedux.cleanup_temp_files
     end
   end
 
