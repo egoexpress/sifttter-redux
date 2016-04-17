@@ -1,36 +1,25 @@
-Sifttter Redux
-==============
-[![Build Status](https://travis-ci.org/bachya/Sifttter-Redux.svg?branch=master)](https://travis-ci.org/bachya/Sifttter-Redux)
-[![Gem Version](https://badge.fury.io/rb/sifttter-redux.svg)](http://badge.fury.io/rb/sifttter-redux)
-
-# Upgrading From 0.x.x to 1.0.0?
-
-Make sure you read the [IFTTT Template](#ifttt-template) section.
+Sifttter Redux Known Edition
+============================
 
 # Intro
 
-Siftter Redux is a modification of Craig Eley's
+The original [Siftter Redux](https://github.com/bachya/Sifttter-Redux) made by Aaron Bach is a modification of Craig Eley's
 [Sifttter](http://craigeley.com/post/72565974459/sifttter-an-ifttt-to-day-one-logger "Sifttter"),
 a script to collect information from [IFTTT](http://www.ifttt.com "IFTTT") and
-place it in a [Day One](http://dayoneapp.com, "Day One") journal.
+place it in a [Day One](http://dayoneapp.com, "Day One") journal. 
 
-Siftter Redux has several fundamental differences:
+This fork of Sifttter Redux, rebranded as "Known Edition", changes the backend to upload the journal entries into [Known](http://www.withknown.com) site. It uses the Known API for it.
 
-* Interactive logging of today's events or events in the past
-* "Catch Up" mode for logging several days' events at once
-* Packaged as a command line app, complete with documentation and help
-* Easy installation on cron for automated running
+# Todo
+
+* use [Micropub](http://micropub.net/) for publishing to allow more versability in the backend
+* calculate HMAC for Known API in the code itself
+* cleanups
 
 # Prerequisites
 
 In addition to Git (which, given you being on this site, I'll assume you have),
-Ruby (v. 1.9.3 or greater) is needed.
-
-# Installation
-
-```
-gem install sifttter-redux
-```
+Ruby (v. 1.9.3 or greater) and some additional gems are needed.
 
 # Usage
 
@@ -558,6 +547,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Credits
 
+* Aaron Bach for creating [Siffter Redux](https://github.com/bachya/Sifttter-Redux)
 * Craig Eley for [Sifttter](http://craigeley.com/post/72565974459/sifttter-an-ifttt-to-day-one-logger "Sifttter")
 and for giving me the idea for Sifttter Redux
 * Dave Copeland for [GLI](https://github.com/davetron5000/gli "GLI")
