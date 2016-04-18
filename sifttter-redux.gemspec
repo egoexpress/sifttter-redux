@@ -4,13 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'sifttter-redux/constants'
 
 Gem::Specification.new do |spec|
-  spec.name             = 'sifttter-redux'
+  spec.name             = 'sifttter-redux-known'
   spec.version          = SifttterRedux::VERSION
-  spec.authors          = ['Aaron Bach']
-  spec.email            = ['bachya1208@googlemail.com']
+  spec.authors          = ['Bjoern Stierand']
+  spec.email            = ['bjoern-ruby@innovention.de']
   spec.summary          = SifttterRedux::SUMMARY
   spec.description      = SifttterRedux::DESCRIPTION
-  spec.homepage         = 'https://github.com/bachya/sifttter-redux'
+  spec.homepage         = 'https://github.com/egoexpress/sifttter-redux-known'
   spec.license          = 'MIT'
   spec.platform         = Gem::Platform::RUBY
 
@@ -26,9 +26,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rake', '10.1.1')
   spec.add_development_dependency('rdoc', '4.1.1')
   spec.add_development_dependency('aruba', '0.5.4')
-  spec.add_runtime_dependency('archive-zip', '0.6.0')
+  spec.add_runtime_dependency('archive-zip', '0.8.0')
   spec.add_runtime_dependency('chronic', '0.10.2')
   spec.add_runtime_dependency('cliutils', '~> 2')
-  spec.add_runtime_dependency('gli','2.9.0')
-  spec.add_runtime_dependency('htmlentities','4.3.1')
+  spec.add_runtime_dependency('gli','2.13.4')
+  spec.add_runtime_dependency('htmlentities','4.3.4')
+  spec.add_runtime_dependency('redcarpet','3.3.4')
 end
