@@ -4,14 +4,22 @@ prompts:
     config_key: sifttter_local_filepath
     config_section: sifttter_redux
   - prompt_text: Where are your Sifttter files located in Dropbox?
-    default: /Apps/ifttt/sifttter
+    default: /Apps/Sifttter
     config_key: sifttter_remote_filepath
     config_section: sifttter_redux
-  - prompt_text: Where do you want to download Day One files to (temporarily)?
-    default: /tmp/dayone
-    config_key: dayone_local_filepath
+  - prompt_text: Where do you want to store local working files to (temporarily)?
+    default: /tmp/sifttter-redux-known
+    config_key: local_filepath
     config_section: sifttter_redux
-  - prompt_text: Where are your Day One files located in Dropbox?
-    default: /Apps/Day\ One/Journal.dayone/entries
-    config_key: dayone_remote_filepath
-    config_section: sifttter_redux
+  - prompt_text: What is the URL of your Known site?
+    default: https://example.com
+    config_key: site_url
+    config_section: known
+  - prompt_text: What is the username for your Known site?
+    default: example
+    config_key: username
+    config_section: known
+  - prompt_text: What is the API key of your Known installation?
+    default: xxxxxx
+    config_key: api_key
+    config_section: known
