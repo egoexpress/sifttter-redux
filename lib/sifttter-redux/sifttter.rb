@@ -38,12 +38,13 @@ module SifttterRedux
     # @param [Date] date The date to search for
     # @return [void]
     def self.run(date)
+
       @entries = {}
       date_for_title = date.strftime('%B %d, %Y')
       date_for_name = date.strftime('%Y-%m-%d')
       datestamp = date.to_time.utc.iso8601
 
-      output_dir = configuration.sifttter_redux[:dayone_local_filepath]
+      output_dir = configuration.sifttter_redux[:local_filepath]
       Dir.mkdir(output_dir) unless Dir.exists?(output_dir)
 
       files = `find #{ configuration.sifttter_redux[:sifttter_local_filepath] } -type f -name "*.txt" | grep -v -i daily | sort`
@@ -62,7 +63,6 @@ module SifttterRedux
       end
 
       if @entries.length > 0
-
         entrytext = "# Things done on #{ date_for_title }\n"
         @entries.each do |key, value|
           coder = HTMLEntities.new

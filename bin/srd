@@ -1,15 +1,14 @@
 #!/usr/bin/env ruby
 # Encoding: utf-8
+
 #--------------------------------------------------------------------
-# Sifttter Redux
+# Sifttter Redux Known Edition
 #
-# A modification of Craig Eley's Sifttter that allows for smart
-# installation on a standalone *NIX device (such as a Raspberry Pi).
+# A modification of Aaron Bach's Sifttter-Redux that uses
+# Known (http://withknown.com) as a backend.
 #
 # Sifttter copyright Craig Eley 2014 <http://craigeley.com>
-#
-# Copyright (c) 2014
-# Aaron Bach <bachya1208@gmail.com>
+# Siftter-Redux copyright (c) 2014 Aaron Bach <bachya1208@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -36,12 +35,20 @@ require 'archive/zip'
 require 'cliutils'
 require 'gli'
 require './lib/sifttter-redux'
-require 'securerandom'
 require 'uri'
 require 'net/http'
+
+# HMAC generation and SSL communication
 require 'openssl'
+
+# Markdown parsing
 require 'redcarpet'
+
+# JSON encoding of request
 require 'json'
+
+# required for HMAC generation
+require 'base64'
 
 include CLIUtils::Configuration
 include CLIUtils::Messaging
@@ -128,7 +135,11 @@ command :exec do |c|
     unless dates.nil?
       first_date = dates.first
       second_date = dates.reverse_each.first
-      hmac = 'yourhmachere'
+
+      statusurl = '/status/edit'
+      apikey = configuration.known[:api_key]
+      hash  = OpenSSL::HMAC.digest('sha256', apikey, statusurl)
+      hmac = Base64.strict_encode64(hash)
 
       date_string = first_date.strftime('%B %d, %Y')
       date_string << " to #{ second_date.strftime('%B %d, %Y') }" if first_date != second_date
@@ -151,28 +162,38 @@ command :exec do |c|
       end
 
       # Upload any entries
-      unless Dir[configuration.sifttter_redux[:dayone_local_filepath] + '/*'].empty?
-        messenger.info("Uploading entries to Known site")
+      unless Dir[configuration.sifttter_redux[:local_filepath] + '/*'].empty?
+
+        site_url  = configuration.known[:site_url]
+
+        messenger.info("Uploading entries to Known site #{ site_url }")
         renderer = Redcarpet::Render::HTML.new(hard_wrap: true)
         markdown = Redcarpet::Markdown.new(renderer, extensions = {})
 
-        Dir.foreach('/tmp/dayone') do |item|
-          next if item == '.' or item == '..'
-          text = markdown.render(File.read("/tmp/dayone/#{ item }"))
+        local_dir = configuration.sifttter_redux[:local_filepath]
+        username  = configuration.known[:username]
 
-          uri = URI.parse("https://known.stierand.org")
+        Dir.foreach(local_dir) do |item|
+          next if item == '.' or item == '..'
+          text = markdown.render(File.read("#{ local_dir }/#{ item }"))
+
+          uri = URI.parse(site_url)
           http = Net::HTTP.new(uri.host, uri.port)
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-          request = Net::HTTP::Post.new("/status/edit")
+
+          http.set_debug_output($stdout)
+
+          request = Net::HTTP::Post.new(statusurl)
           request.add_field('Accept', 'application/json')
-          request.add_field('X-KNOWN-USERNAME', 'bjoern')
+          request.add_field('X-KNOWN-USERNAME', username)
           request.add_field('X-KNOWN-SIGNATURE', hmac)
 
           body = {:body => text }
           request.body = body.to_json
 
           response = http.request(request)
+          puts response
         end
 
         messenger.info('Done.')
