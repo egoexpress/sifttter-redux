@@ -3,23 +3,24 @@ Sifttter Redux Known Edition
 
 # Intro
 
-The original [Siftter Redux](https://github.com/bachya/Sifttter-Redux) made by Aaron Bach is a modification of Craig Eley's
-[Sifttter](http://craigeley.com/post/72565974459/sifttter-an-ifttt-to-day-one-logger "Sifttter"),
+The original [Siftter Redux](https://github.com/bachya/Sifttter-Redux) made by Aaron Bach is a modification 
+of Craig Eley's [Sifttter](http://craigeley.com/post/72565974459/sifttter-an-ifttt-to-day-one-logger "Sifttter"),
 a script to collect information from [IFTTT](http://www.ifttt.com "IFTTT") and
 place it in a [Day One](http://dayoneapp.com, "Day One") journal. 
 
-This fork of Sifttter Redux, rebranded as "Known Edition", changes the backend to upload the journal entries into [Known](http://www.withknown.com) site. It uses the Known API for it.
+This fork of Sifttter Redux, rebranded as "Known Edition", changes the backend to upload the journal entries into [Known](http://www.withknown.com) site. It uses the Known API for it and creates a single post for every day. 
+Currently these posts are public so watch out.
 
 # Todo
 
 * use [Micropub](http://micropub.net/) for publishing to allow more versability in the backend
-* calculate HMAC for Known API in the code itself
+* add option to set visibility of generated post
 * cleanups
 
 # Prerequisites
 
 In addition to Git (which, given you being on this site, I'll assume you have),
-Ruby (v. 1.9.3 or greater) and some additional gems are needed.
+Ruby (v. 1.9.3 or greater) and some additional gems are needed. These are specified in the gemfile.
 
 # Usage
 
@@ -124,15 +125,16 @@ Initialization will perform the following steps:
 1. Download [Dropbox Uploader](https://github.com/andreafabrizi/Dropbox-Uploader "Dropbox-Uploder")
 to a location of your choice.
 2. Automatically configure Dropbox Uploader.
-3. Collect some user paths (note that you can use tab completion here!):
+3. Collect some user paths and infos (note that you can use tab completion here!):
  * The location on your filesystem where Sifttter files will be temporarily stored
  * The location of your Sifttter files in Dropbox
- * The location on your filesystem where Day One files will be temporarily stored
- * The location of your Day One files in Dropbox
+ * The URL of your Known site
+ * The username for the Known site
+ * The API key for the Known site (find that one on https://<YOUR_KNOWN_SITE>/account/settings/tools/
 
 ## Pathing
 
-Note that when Sifttter Redux asks you for paths, it will ask for "local" and
+Note that when Sifttter Redux Known Edition asks you for paths, it will ask for "local" and
 "remote" filepaths. It's important to understand the difference.
 
 ### Local Filepaths
@@ -155,14 +157,14 @@ folder (*as Dropbox Uploader would see them*). For instance,
 
 ```
 $ srd exec
-#### EXECUTING...
----> INFO: Creating entry for February 15, 2014...
----> INFO: Downloading Sifttter files...DONE.
----> SUCCESS: Entry logged for February 15, 2014...
----> INFO: Uploading Day One entries to Dropbox...DONE.
----> INFO: Removing downloaded Day One files...DONE.
----> INFO: Removing downloaded Sifttter files...DONE.
-#### EXECUTION COMPLETE!
+# Creating entry: April 18, 2016
+# Downloading Sifttter files...
+# Done.
+# Entry logged for April 18, 2016...
+# Uploading entries to Known site https://known.stierand.org
+# Uploading entry for 2016-04-18
+# Upload done.
+# Removing temporary local files...
 ```
 
 ## "Catch-up" Mode
@@ -508,25 +510,23 @@ value in `~/.sifttter_redux` to your desired level.
 
 # Bugs and Feature Requests
 
-My current roadmap can be found on my
-[Trello board](https://trello.com/b/z4vl3YxC/sifttter-redux "Sifttter Redux Trello Board").
-
-To report bugs with or suggest features/changes for Sifttter Redux, please use
-the [Issues Page](http://github.com/bachya/sifttter-redux/issues).
+To report bugs with or suggest features/changes for Sifttter Redux Known Edition, please use
+the [Issues Page](http://github.com/egoexpress/sifttter-redux-known/issues).
 
 Contributions are welcome and encouraged. To contribute:
 
-* [Fork Sifttter Redux](http://github.com/bachya/sifttter-redux/fork).
+* [Fork Sifttter Redux Known Edition](http://github.com/egoexpress/sifttter-redux-known/fork).
 * Create a branch for your contribution (`git checkout -b new-feature`).
 * Commit your changes (`git commit -am 'Added this new feature'`).
 * Push to the branch (`git push origin new-feature`).
-* Create a new [Pull Request](http://github.com/bachya/sifttter-redux/compare/).
+* Create a new [Pull Request](http://github.com/egoexpress/sifttter-redux-known/compare/).
 
 # License
 
 (The MIT License)
 
-Copyright © 2014 Aaron Bach <bachya1208@gmail.com>
+Copyright © 2016 Bjoern Stierand <bjoern-github@innovention.de>
+Sifttter Redux Copyright © 2014 Aaron Bach <bachya1208@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the 'Software'), to deal in the
@@ -546,12 +546,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTI
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Credits
-
+* the [Indiewebcamp](https://indiewebcamp.com) crew who inspired me to fork Sifttter-Redux and create the Known backend during [IndieWebCamp Nuremberg 2016](https://indiewebcamp.com/2016/Nuremberg)
 * Aaron Bach for creating [Siffter Redux](https://github.com/bachya/Sifttter-Redux)
 * Craig Eley for [Sifttter](http://craigeley.com/post/72565974459/sifttter-an-ifttt-to-day-one-logger "Sifttter")
-and for giving me the idea for Sifttter Redux
-* Dave Copeland for [GLI](https://github.com/davetron5000/gli "GLI")
-* Andrea Fabrizi for [Dropbox Uploader](https://github.com/andreafabrizi/Dropbox-Uploader "Dropbox Uploader")
-* ~~Tom Preston-Werner~~ (sorry: can't
-support [harrassment](http://www.businessinsider.com/github-co-founder-suspended-2014-3 "GitHub Founder Tom Preston-Werner Suspended After Harassment Allegations"))
-~~and~~ Lee Jarvis for [Chronic](https://github.com/mojombo/chronic "Chronic")
