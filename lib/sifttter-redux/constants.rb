@@ -15,7 +15,7 @@ module SifttterRedux
   DEFAULT_SRD_LOG_FILEPATH = File.join(ENV['HOME'], '.sifttter_redux_log')
 
   # The Gem's description
-  DESCRIPTION = 'A customized IFTTT-to-Day One service that allows for smart installation and automated running on a standalone *NIX device (such as a Raspberry Pi).'
+  DESCRIPTION = 'A IFTTT-to-Known service that allows for smart installation and automated running on a standalone *NIX device (such as a Raspberry Pi).'
 
   # The last version to require a config update
   NEWEST_CONFIG_VERSION = '1.0.0'
@@ -26,8 +26,8 @@ module SifttterRedux
   }
 
   # The Gem's summary
-  SUMMARY = 'Automated IFTTT to Day One engine.'
+  SUMMARY = 'Automated IFTTT to Known engine.'
 
   # The Gem's version
-  VERSION = '1.0.6'
+  VERSION = '1.0'
 end
