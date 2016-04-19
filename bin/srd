@@ -182,8 +182,6 @@ command :exec do |c|
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
-          http.set_debug_output($stdout)
-
           request = Net::HTTP::Post.new(statusurl)
           request.add_field('Accept', 'application/json')
           request.add_field('X-KNOWN-USERNAME', username)
@@ -192,11 +190,17 @@ command :exec do |c|
           body = {:body => text }
           request.body = body.to_json
 
-          response = http.request(request)
-          puts response
-        end
+          messenger.info("Uploading entry for #{ item.gsub(/\.md/,"") }")
 
-        messenger.info('Done.')
+          begin
+            response = http.request(request)
+          rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+                 Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError,
+                 Net::ProtocolError => e
+              messenger.error(e.to_s)
+          end
+        end
+        messenger.info('Upload done.')
       end
 
       # Remove any downloaded local files that we no longer need.
