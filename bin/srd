@@ -103,6 +103,8 @@ end
 
 on_error do |exception|
   messenger.error(exception.to_s)
+  # enable for debugging
+  # puts exception.backtrace
   exit!(1)
   true
 end
@@ -136,7 +138,7 @@ command :exec do |c|
       first_date = dates.first
       second_date = dates.reverse_each.first
 
-      statusurl = '/status/edit'
+      statusurl = '/entry/edit'
       apikey = configuration.known[:api_key]
       hash  = OpenSSL::HMAC.digest('sha256', apikey, statusurl)
       hmac = Base64.strict_encode64(hash)
@@ -187,10 +189,12 @@ command :exec do |c|
           request.add_field('X-KNOWN-USERNAME', username)
           request.add_field('X-KNOWN-SIGNATURE', hmac)
 
-          body = {:body => text }
+          current_date = item.gsub(/\.md/,"")
+          body = {:body  => text,
+                  :title => "Things done on #{ current_date }"}
           request.body = body.to_json
 
-          messenger.info("Uploading entry for #{ item.gsub(/\.md/,"") }")
+          messenger.info("Uploading entry for #{ current_date }")
 
           begin
             response = http.request(request)

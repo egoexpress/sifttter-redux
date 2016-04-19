@@ -42,7 +42,6 @@ module SifttterRedux
       @entries = {}
       date_for_title = date.strftime('%B %d, %Y')
       date_for_name = date.strftime('%Y-%m-%d')
-      datestamp = date.to_time.utc.iso8601
 
       output_dir = configuration.sifttter_redux[:local_filepath]
       Dir.mkdir(output_dir) unless Dir.exists?(output_dir)
@@ -63,10 +62,10 @@ module SifttterRedux
       end
 
       if @entries.length > 0
-        entrytext = "# Things done on #{ date_for_title }\n"
+        entrytext = ''
         @entries.each do |key, value|
           coder = HTMLEntities.new
-          entrytext += '### ' + key.gsub(/.txt/, '').gsub(/_/, ' ').capitalize + "\n\n"
+          entrytext += '#### ' + key.gsub(/.txt/, '').gsub(/_/, ' ').capitalize + "\n\n"
           value.each { |v| entrytext += "#{ coder.encode(v[1].gsub(/%time%/, v[0])) }\n" }
           entrytext += "\n"
         end
