@@ -23,3 +23,7 @@ prompts:
     default: xxxxxx
     config_key: api_key
     config_section: known
+  - prompt_text: What visibility do you want for the journal entries (public/member/private)?
+    default: member
+    config_key: visibility
+    config_section: known

@@ -50,6 +50,9 @@ require 'json'
 # required for HMAC generation
 require 'base64'
 
+# datetime handling
+require 'date'
+
 include CLIUtils::Configuration
 include CLIUtils::Messaging
 include GLI::App
@@ -190,8 +193,14 @@ command :exec do |c|
           request.add_field('X-KNOWN-SIGNATURE', hmac)
 
           current_date = item.gsub(/\.md/,"")
+          cr_date = Date.parse(current_date).strftime("%Y:%m:%d 20:00:00+01:00")
+
           body = {:body  => text,
-                  :title => "Things done on #{ current_date }"}
+                  :access => 'SITE',
+                  :title => "Things done on #{ current_date }",
+                  :created => cr_date,
+                  :tags => '#journal'
+          }
           request.body = body.to_json
 
           messenger.info("Uploading entry for #{ current_date }")
@@ -200,7 +209,7 @@ command :exec do |c|
             response = http.request(request)
           rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
                  Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError,
-                 Net::ProtocolError => e
+                 Net::ProtocolError, Net::HTTPBadRequest => e
               messenger.error(e.to_s)
           end
         end
