@@ -1,6 +1,4 @@
 Gemfile.lock
 .bundle
 .DS_Store
-results.html
 *.gem
-features/3.execution.feature
