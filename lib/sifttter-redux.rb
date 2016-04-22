@@ -49,14 +49,14 @@ module SifttterRedux
       path = default if path.empty?
       path.chop! if path.end_with?('/')
 
-      if not File.exists?('/usr/bin/curl')
+      if not File.exist?('/usr/bin/curl')
         messenger.error("Curl is not installed!")
         return 1
       end
 
-      if File.exists?('/usr/bin/git')
+      if File.exist?('/usr/bin/git')
         # If the entered directory exists, clone the repository.
-        if Dir.exists?(File.expand_path(path))
+        if Dir.exist?(File.expand_path(path))
           valid_path_chosen = true
 
           dbu_path = File.join(path, 'Dropbox-Uploader')
@@ -71,7 +71,7 @@ module SifttterRedux
           end
 
           # If the user has never configured Dropbox Uploader, have them do it here.
-          unless File.exists?(DEFAULT_DBU_CONFIG_FILEPATH)
+          unless File.exist?(DEFAULT_DBU_CONFIG_FILEPATH)
             messenger.info('Initializing Dropbox Uploader...')
             system "#{ executable_path }"
           end

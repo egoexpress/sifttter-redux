@@ -6,8 +6,6 @@ def version
   contents[/\sVERSION = '([^']+)'/, 1]
 end
 
-spec = eval(File.read('sifttter-redux.gemspec'))
-
 require 'rake/testtask'
 desc 'Run unit tests'
 Rake::TestTask.new do |t|
@@ -33,7 +31,7 @@ task :release => :build do
     puts "You must be on the master branch to release!"
     exit!
   end
-  
+
   sh "git commit --allow-empty -a -m 'Release #{ version }'"
   sh "git tag v#{ version }"
   sh "git push origin master"

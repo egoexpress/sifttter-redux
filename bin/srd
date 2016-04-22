@@ -78,7 +78,7 @@ pre do |global, command, options, args|
   file_logger.level = LOG_LEVELS[configuration.sifttter_redux[:log_level] || 'DEBUG']
   messenger.attach(LOGFILE: file_logger)
 
-  if File.exists?(SifttterRedux::DEFAULT_SRD_CONFIG_FILEPATH)
+  if File.exist?(SifttterRedux::DEFAULT_SRD_CONFIG_FILEPATH)
     # Set the current and last config versions in the Configurator.
     configuration.current_version = configuration.sifttter_redux[:version]
     configuration.last_version = SifttterRedux::NEWEST_CONFIG_VERSION
@@ -173,7 +173,7 @@ command :exec do |c|
 
         messenger.info("Uploading entries to Known site #{ site_url }")
         renderer = Redcarpet::Render::HTML.new(hard_wrap: true)
-        markdown = Redcarpet::Markdown.new(renderer, extensions = {})
+        markdown = Redcarpet::Markdown.new(renderer)
 
         local_dir = configuration.sifttter_redux[:local_filepath]
         username  = configuration.known[:username]
@@ -206,7 +206,7 @@ command :exec do |c|
           messenger.info("Uploading entry for #{ current_date }")
 
           begin
-            response = http.request(request)
+            http.request(request)
           rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
                  Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError,
                  Net::ProtocolError, Net::HTTPBadRequest => e
