@@ -27,15 +27,12 @@ module SifttterRedux
       @logger = logger
     end
 
-    # Downloads files from Dropbox (assumes that both
-    # local_target and remote_target have been set).
-    # @return [void]
-    def download
+    def performOperation(operation)
       if !@local_target.nil? && !@remote_target.nil?
         if @verbose
-          system "#{ @dbu } download #{ @remote_target } #{ @local_target }"
+          system "#{ @dbu } #{ operation } #{ @remote_target } #{ @local_target }"
         else
-          exec = `#{ @dbu } download #{ @remote_target } #{ @local_target }`
+          `#{ @dbu } #{ operation } #{ @remote_target } #{ @local_target }`
         end
       else
         error_msg = 'Local and remote targets cannot be nil'
@@ -44,21 +41,18 @@ module SifttterRedux
       end
     end
 
+    # Downloads files from Dropbox (assumes that both
+    # local_target and remote_target have been set).
+    # @return [void]
+    def download
+      self.performOperation('download')
+    end
+
     # Uploads files tro Dropbox (assumes that both
     # local_target and remote_target have been set).
     # @return [void]
     def upload
-      if !@local_target.nil? && !@remote_target.nil?
-        if @verbose
-          system "#{ @dbu } upload #{ @local_target } #{ @remote_target }"
-        else
-          exec = `#{ @dbu } upload #{ @local_target } #{ @remote_target }`
-        end
-      else
-        error_msg = 'Local and remote targets cannot be nil'
-        @logger.error(error_msg) if @logger
-        fail StandardError, error_msg
-      end
+      self.performOperation('upload')
     end
   end
 end
