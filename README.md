@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/egoexpress/sifttter-redux-known/badges/gpa.svg)](https://codeclimate.com/github/egoexpress/sifttter-redux-known) [![Travis CI](https://travis-ci.org/egoexpress/sifttter-redux-known.svg?branch=master)](https://travis-ci.org/egoexpress/sifttter-redux-known)
+
 Sifttter Redux Known Edition
 ============================
 
