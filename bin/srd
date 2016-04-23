@@ -112,6 +112,79 @@ on_error do |exception|
   true
 end
 
+def download_dropbox(dbu)
+  dbu.verbose = SifttterRedux.verbose
+  dbu.local_target = configuration.sifttter_redux[:sifttter_local_filepath]
+  dbu.remote_target = configuration.sifttter_redux[:sifttter_remote_filepath]
+  dbu.message = 'Downloading Sifttter files...'
+
+  messenger.info(dbu.message || dbu::DEFAULT_MESSAGE)
+  dbu.download
+  messenger.info('Done.')
+end
+
+def calculate_hmac(statusurl)
+  apikey = configuration.known[:api_key]
+  hash  = OpenSSL::HMAC.digest('sha256', apikey, statusurl)
+  hmac = Base64.strict_encode64(hash)
+  hmac
+end
+
+def build_request(statusurl, hmac, current_date, text)
+  username  = configuration.known[:username]
+
+  cr_date = Date.parse(current_date).strftime("%Y:%m:%d 20:00:00+01:00")
+
+  request = Net::HTTP::Post.new(statusurl)
+  request.add_field('Accept', 'application/json')
+  request.add_field('X-KNOWN-USERNAME', username)
+  request.add_field('X-KNOWN-SIGNATURE', hmac)
+
+  body = {:body  => text,
+          :access => 'SITE',
+          :title => "Things done on #{ current_date }",
+          :created => cr_date,
+          :tags => '#journal'
+  }
+  request.body = body.to_json
+  request
+end
+
+def upload_entries
+
+  statusurl = '/entry/edit'
+  hmac = calculate_hmac(statusurl)
+
+  site_url  = configuration.known[:site_url]
+  uri = URI.parse(site_url)
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+  messenger.info("Uploading entries to Known site #{ site_url }")
+  renderer = Redcarpet::Render::HTML.new(hard_wrap: true)
+  markdown = Redcarpet::Markdown.new(renderer)
+
+  local_dir = configuration.sifttter_redux[:local_filepath]
+
+  Dir.foreach(local_dir) do |item|
+    next if item == '.' or item == '..'
+    text = markdown.render(File.read("#{ local_dir }/#{ item }"))
+    current_date = item.gsub(/\.md/,"")
+
+    request = build_request(statusurl, hmac, current_date, text)
+    messenger.info("Uploading entry for #{ current_date }")
+
+    begin
+      http.request(request)
+    rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+           Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError,
+           Net::ProtocolError, Net::HTTPBadRequest => e
+        messenger.error(e.to_s)
+    end
+  end
+end
+
 #  ======================================================
 #  Commands
 #  ======================================================
@@ -141,25 +214,13 @@ command :exec do |c|
       first_date = dates.first
       second_date = dates.reverse_each.first
 
-      statusurl = '/entry/edit'
-      apikey = configuration.known[:api_key]
-      hash  = OpenSSL::HMAC.digest('sha256', apikey, statusurl)
-      hmac = Base64.strict_encode64(hash)
-
       date_string = first_date.strftime('%B %d, %Y')
       date_string << " to #{ second_date.strftime('%B %d, %Y') }" if first_date != second_date
       messenger.info("Creating #{ first_date == second_date ? 'entry' : 'entries' }: #{ date_string }")
 
       # Download Sifttter files from Dropbox.
       dbu = SifttterRedux::DropboxUploader.new(configuration.db_uploader[:exe_filepath])
-      dbu.verbose = SifttterRedux.verbose
-      dbu.local_target = configuration.sifttter_redux[:sifttter_local_filepath]
-      dbu.remote_target = configuration.sifttter_redux[:sifttter_remote_filepath]
-      dbu.message = 'Downloading Sifttter files...'
-
-      messenger.info(dbu.message || dbu::DEFAULT_MESSAGE)
-      dbu.download
-      messenger.info('Done.')
+      download_dropbox(dbu)
 
       # Process a new Sifttter entry for each date.
       dates.each do |date|
@@ -168,51 +229,7 @@ command :exec do |c|
 
       # Upload any entries
       unless Dir[configuration.sifttter_redux[:local_filepath] + '/*'].empty?
-
-        site_url  = configuration.known[:site_url]
-
-        messenger.info("Uploading entries to Known site #{ site_url }")
-        renderer = Redcarpet::Render::HTML.new(hard_wrap: true)
-        markdown = Redcarpet::Markdown.new(renderer)
-
-        local_dir = configuration.sifttter_redux[:local_filepath]
-        username  = configuration.known[:username]
-
-        Dir.foreach(local_dir) do |item|
-          next if item == '.' or item == '..'
-          text = markdown.render(File.read("#{ local_dir }/#{ item }"))
-
-          uri = URI.parse(site_url)
-          http = Net::HTTP.new(uri.host, uri.port)
-          http.use_ssl = true
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-          request = Net::HTTP::Post.new(statusurl)
-          request.add_field('Accept', 'application/json')
-          request.add_field('X-KNOWN-USERNAME', username)
-          request.add_field('X-KNOWN-SIGNATURE', hmac)
-
-          current_date = item.gsub(/\.md/,"")
-          cr_date = Date.parse(current_date).strftime("%Y:%m:%d 20:00:00+01:00")
-
-          body = {:body  => text,
-                  :access => 'SITE',
-                  :title => "Things done on #{ current_date }",
-                  :created => cr_date,
-                  :tags => '#journal'
-          }
-          request.body = body.to_json
-
-          messenger.info("Uploading entry for #{ current_date }")
-
-          begin
-            http.request(request)
-          rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
-                 Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError,
-                 Net::ProtocolError, Net::HTTPBadRequest => e
-              messenger.error(e.to_s)
-          end
-        end
+        upload_entries
         messenger.info('Upload done.')
       end
 
@@ -259,14 +276,7 @@ command :upgrade do |c|
 
     # Download Sifttter files from Dropbox.
     dbu = SifttterRedux::DropboxUploader.new(configuration.db_uploader[:exe_filepath])
-    dbu.verbose = SifttterRedux.verbose
-    dbu.local_target = configuration.sifttter_redux[:sifttter_local_filepath]
-    dbu.remote_target = configuration.sifttter_redux[:sifttter_remote_filepath]
-    dbu.message = "Backing up Sifttter files to #{ filename }..."
-
-    messenger.info(dbu.message || dbu::DEFAULT_MESSAGE)
-    dbu.download
-    messenger.info('Done.')
+    download_dropbox(dbu)
 
     # Archive the Sifttter files.
     Archive::Zip.archive(filename, configuration.sifttter_redux[:sifttter_local_filepath])
