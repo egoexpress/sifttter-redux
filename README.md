@@ -10,14 +10,13 @@ of Craig Eley's [Sifttter](http://craigeley.com/post/72565974459/sifttter-an-ift
 a script to collect information from [IFTTT](http://www.ifttt.com "IFTTT") and
 place it in a [Day One](http://dayoneapp.com, "Day One") journal. 
 
-This fork of Sifttter Redux, rebranded as "Known Edition", changes the backend to upload the journal entries into [Known](http://www.withknown.com) site. It uses the Known API for it and creates a single post for every day. 
-Currently these posts are public so watch out.
+This fork of Sifttter Redux, rebranded as "Known Edition", changes the backend to upload the journal entries into [Known](http://www.withknown.com) site. It uses the Known API for it and creates a single post for every day (that is dated at 8pm). The post is not public so you have to be logged in at your site to see it.
 
 # Todo
 
 * use [Micropub](http://micropub.net/) for publishing to allow more versability in the backend
-* add option to set visibility of generated post
-* cleanups
+* add configuration option to change the visibility of the created Known entry
+* code cleanups
 
 # Prerequisites
 
