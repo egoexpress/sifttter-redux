@@ -34,7 +34,7 @@
 require 'archive/zip'
 require 'cliutils'
 require 'gli'
-require './lib/sifttter-redux'
+require 'sifttter-redux'
 require 'uri'
 require 'net/http'
 
