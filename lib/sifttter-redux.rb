@@ -31,6 +31,20 @@ module SifttterRedux
     end
   end
 
+  def self.check_dbu_requirements
+    if not File.exist?('/usr/bin/curl')
+      messenger.error("Curl is not installed!")
+      return 1
+    end
+
+    if not File.exist?('/usr/bin/git')
+      messenger.error("Git is not installed!")
+      return 1
+    end
+
+    return
+  end
+
   # Runs a wizard that installs Dropbox Uploader on the
   # local filesystem.
   # @param [Boolean] from_scratch
@@ -45,49 +59,44 @@ module SifttterRedux
       else
         default = DEFAULT_DBU_LOCAL_FILEPATH
       end
+
       path = messenger.prompt('Location for Dropbox-Uploader', default)
       path = default if path.empty?
       path.chop! if path.end_with?('/')
 
-      if not File.exist?('/usr/bin/curl')
-        messenger.error("Curl is not installed!")
+      if not self.check_dbu_requirements
         return 1
       end
 
-      if File.exist?('/usr/bin/git')
-        # If the entered directory exists, clone the repository.
-        if Dir.exist?(File.expand_path(path))
-          valid_path_chosen = true
+      # If the entered directory exists, clone the repository.
+      if Dir.exist?(File.expand_path(path))
+        valid_path_chosen = true
 
-          dbu_path = File.join(path, 'Dropbox-Uploader')
-          executable_path = File.join(dbu_path, 'dropbox_uploader.sh')
+        dbu_path = File.join(path, 'Dropbox-Uploader')
+        executable_path = File.join(dbu_path, 'dropbox_uploader.sh')
 
-          if File.directory?(dbu_path)
-            messenger.warn("Using pre-existing Dropbox Uploader at #{ dbu_path }...")
-          else
-            messenger.info("Downloading Dropbox Uploader to #{ dbu_path }...")
-            system "git clone https://github.com/andreafabrizi/Dropbox-Uploader.git #{ dbu_path }"
-            messenger.info('Done.')
-          end
-
-          # If the user has never configured Dropbox Uploader, have them do it here.
-          unless File.exist?(DEFAULT_DBU_CONFIG_FILEPATH)
-            messenger.info('Initializing Dropbox Uploader...')
-            system "#{ executable_path }"
-          end
-
-          configuration.add_section(:db_uploader) unless configuration.data.key?(:db_uploader)
-          configuration.db_uploader.merge!({
-            base_filepath: path,
-            dbu_filepath: dbu_path,
-            exe_filepath: executable_path
-          })
+        if File.directory?(dbu_path)
+          messenger.warn("Using pre-existing Dropbox Uploader at #{ dbu_path }...")
         else
-          messenger.error("Sorry, but #{ path } isn't a valid directory.")
+          messenger.info("Downloading Dropbox Uploader to #{ dbu_path }...")
+          system "git clone https://github.com/andreafabrizi/Dropbox-Uploader.git #{ dbu_path }"
+          messenger.info('Done.')
         end
+
+        # If the user has never configured Dropbox Uploader, have them do it here.
+        unless File.exist?(DEFAULT_DBU_CONFIG_FILEPATH)
+          messenger.info('Initializing Dropbox Uploader...')
+          system "#{ executable_path }"
+        end
+
+        configuration.add_section(:db_uploader) unless configuration.data.key?(:db_uploader)
+        configuration.db_uploader.merge!({
+          base_filepath: path,
+          dbu_filepath: dbu_path,
+          exe_filepath: executable_path
+        })
       else
-          messenger.error("Sorry, git doesn't seem to be installed.")
-          return 1
+        messenger.error("Sorry, but #{ path } isn't a valid directory.")
       end
     end
   end
@@ -117,13 +126,13 @@ module SifttterRedux
 
       # Custom Range
       if (options[:f] || options[:t])
-        _dates = DateRangeMaker.range(options[:f], options[:t], options[:i])
+        cust_dates = DateRangeMaker.range(options[:f], options[:t], options[:i])
 
-        if _dates.last > Date.today
+        if cust_dates.last > Date.today
           messenger.warn("Ignoring overextended end date and using today's date (#{ Date.today })...")
-          r = (_dates.first..Date.today)
+          r = (cust_dates.first..Date.today)
         else
-          r = _dates
+          r = cust_dates
         end
       end
     else
