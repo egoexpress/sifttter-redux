@@ -137,6 +137,8 @@ def build_request(statusurl, hmac, current_date, text)
 
   request = Net::HTTP::Post.new(statusurl)
   request.add_field('Accept', 'application/json')
+  request.add_field('Content-Type', 'application/json; charset=utf-8')
+
   request.add_field('X-KNOWN-USERNAME', username)
   request.add_field('X-KNOWN-SIGNATURE', hmac)
 
