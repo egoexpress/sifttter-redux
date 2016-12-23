@@ -42,7 +42,7 @@ module SifttterRedux
       return 1
     end
 
-    return
+    return 0
   end
 
   # Runs a wizard that installs Dropbox Uploader on the
@@ -70,31 +70,37 @@ module SifttterRedux
 
       # If the entered directory exists, clone the repository.
       if Dir.exist?(File.expand_path(path))
-        valid_path_chosen = true
 
-        dbu_path = File.join(path, 'Dropbox-Uploader')
-        executable_path = File.join(dbu_path, 'dropbox_uploader.sh')
-
-        if File.directory?(dbu_path)
-          messenger.warn("Using pre-existing Dropbox Uploader at #{ dbu_path }...")
+        # check if we have write permissions
+        if not File.writable?(File.expand_path(path))
+          messenger.error("Can't create a directory at #{ path }!")
         else
-          messenger.info("Downloading Dropbox Uploader to #{ dbu_path }...")
-          system "git clone https://github.com/andreafabrizi/Dropbox-Uploader.git #{ dbu_path }"
-          messenger.info('Done.')
-        end
+          valid_path_chosen = true
 
-        # If the user has never configured Dropbox Uploader, have them do it here.
-        unless File.exist?(DEFAULT_DBU_CONFIG_FILEPATH)
-          messenger.info('Initializing Dropbox Uploader...')
-          system "#{ executable_path }"
-        end
+          dbu_path = File.join(path, 'Dropbox-Uploader')
+          executable_path = File.join(dbu_path, 'dropbox_uploader.sh')
 
-        configuration.add_section(:db_uploader) unless configuration.data.key?(:db_uploader)
-        configuration.db_uploader.merge!({
-          base_filepath: path,
-          dbu_filepath: dbu_path,
-          exe_filepath: executable_path
-        })
+          if File.directory?(dbu_path)
+            messenger.warn("Using pre-existing Dropbox Uploader at #{ dbu_path }...")
+          else
+            messenger.info("Downloading Dropbox Uploader to #{ dbu_path }...")
+            system "git clone https://github.com/andreafabrizi/Dropbox-Uploader.git #{ dbu_path }"
+            messenger.info('Done.')
+          end
+
+          # If the user has never configured Dropbox Uploader, have them do it here.
+          unless File.exist?(DEFAULT_DBU_CONFIG_FILEPATH)
+            messenger.info('Initializing Dropbox Uploader...')
+            system "#{ executable_path }"
+          end
+
+          configuration.add_section(:db_uploader) unless configuration.data.key?(:db_uploader)
+          configuration.db_uploader.merge!({
+            base_filepath: path,
+            dbu_filepath: dbu_path,
+            exe_filepath: executable_path
+          })
+        end
       else
         messenger.error("Sorry, but #{ path } isn't a valid directory.")
       end
