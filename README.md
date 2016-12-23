@@ -126,8 +126,7 @@ There are many ways to use this mode:
 * catch-up from a specific point in time until today: `srd exec -i -f 2014-02-01`
 
 `-f` and `-t` are *inclusive* parameters, meaning that when specified, those
-dates will be included when searching for Siftter data.
-* Although you can specify `-f` by itself, you cannot specify `-t` by itself.
+dates will be included when searching for Siftter data. Although you can specify `-f` by itself, you cannot specify `-t` by itself.
 
 This tool makes use of the excellent
 [Chronic gem](https://github.com/mojombo/chronic "Chronic"), which provides
