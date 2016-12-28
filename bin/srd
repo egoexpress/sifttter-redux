@@ -267,8 +267,12 @@ command :init do |c|
     if options[:s]
       SifttterRedux::init(true)
     else
-      long_message = "You've already initialized Sifttter Redux. Do it again?"
-      SifttterRedux::init if messenger.prompt(long_message, 'N').downcase == 'y'
+      print "\e[36mYou've already initialized Sifttter Redux. Do it again? [default: N]\e[0m "
+      STDOUT.flush
+      reply = gets.chomp
+      if reply.downcase == 'y'
+        SifttterRedux::init
+      end
     end
   end
 end
