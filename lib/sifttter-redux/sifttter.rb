@@ -66,7 +66,10 @@ module SifttterRedux
         @entries.each do |key, value|
           coder = HTMLEntities.new
           entrytext += '#### ' + key.gsub(/.txt/, '').gsub(/_/, ' ').capitalize + "\n\n"
-          value.each { |v| entrytext += "#{ coder.encode(v[1].gsub(/%time%/, v[0])) }\n" }
+          value.each { |v|
+            # set entry time to 9:00AM if no time is contained in the Sifttter file
+            entrytext += "#{ coder.encode(v[1].gsub(/%time%/, v[0] != nil ? v[0] : "09:00AM")) }\n"
+          }
           entrytext += "\n"
         end
 
