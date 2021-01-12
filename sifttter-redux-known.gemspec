@@ -31,5 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency('cliutils', '~> 2')
   spec.add_runtime_dependency('gli','2.13.4')
   spec.add_runtime_dependency('htmlentities','4.3.4')
-  spec.add_runtime_dependency('redcarpet','3.3.4')
+  spec.add_runtime_dependency('redcarpet','>= 3.5.1')
 end
