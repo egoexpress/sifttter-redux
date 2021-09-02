@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = %w[README.md HISTORY.md LICENSE]
 
   spec.add_development_dependency('rake', '>= 12.3.3')
-  spec.add_development_dependency('rdoc', '4.1.1')
+  spec.add_development_dependency('rdoc', '6.3.1')
   spec.add_development_dependency('aruba', '0.5.4')
   spec.add_runtime_dependency('archive-zip', '~> 0.8', '>= 0.8.0')
   spec.add_runtime_dependency('chronic', '0.10.2')
